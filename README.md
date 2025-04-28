@@ -1,10 +1,12 @@
 # 3D Boids Simulation
 
-This project was created as the final project for the course **Generative Methods for Computer Graphics (02563)** at **DTU**.  
-It is a rework and extension of a 2D Godot compute shader boids project originally developed by [xxx], adapted into a 3D boids simulation.
+This project was created as the final project for the course **Generative Methods for Computer Graphics (02563)** at **DTU**.
 
-The project explores flocking behavior using compute shaders in Godot, transitioning from 2D to 3D for a richer and more dynamic simulation.
+The project explores flocking behavior using compute shaders in Godot, featuring multiple implementations:
+- 2D boids simulation using both CPU and GPU compute shaders
+- 3D boids simulation using both CPU and GPU compute shaders
+- A simple UI for visualizing and adjusting flocking parameters such as alignment, cohesion, separation, neighbor radius, and more.
 
 ## Acknowledgements
-Original 2D project by @niceeffort.
-Heavily inspired by @SebLague's Boids project steering algorithm.
+Original 2D Boids Compute project by [@niceeffort](https://github.com/niceeffort).  
+Heavily inspired by [@SebLague](https://github.com/SebLague)'s Boids project and steering algorithms.
