@@ -1,0 +1,115 @@
+[gd_scene load_steps=14 format=3 uid="uid://baq47jb3rp0up"]
+
+[ext_resource type="Script" uid="uid://d4nm6snf7jf75" path="res://3D/main_3d.gd" id="1_wgehl"]
+[ext_resource type="Texture2D" uid="uid://7tjshxom4mfu" path="res://boid_resources/skyrender_1.png" id="2_7mund"]
+[ext_resource type="Shader" uid="uid://cvsgnm3vigxbm" path="res://godot_shaders/BoidParticles3D.gdshader" id="2_jvady"]
+[ext_resource type="ArrayMesh" uid="uid://dmc8h6bdbawfy" path="res://boid_resources/fish2.obj" id="4_c7fxi"]
+[ext_resource type="BoxMesh" uid="uid://5wk0s0jl1qbd" path="res://boid_resources/BoundaryBox.tres" id="5_6hh2s"]
+[ext_resource type="PackedScene" uid="uid://b3i5rtg0dojte" path="res://3D/mine_craft_controller.tscn" id="5_c7fxi"]
+[ext_resource type="PackedScene" uid="uid://b6lx6v7vb1xxq" path="res://UI.tscn" id="7_7mund"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_3lx8b"]
+panorama = ExtResource("2_7mund")
+
+[sub_resource type="Sky" id="Sky_r88ux"]
+sky_material = SubResource("PanoramaSkyMaterial_3lx8b")
+
+[sub_resource type="Environment" id="Environment_3lx8b"]
+background_mode = 2
+sky = SubResource("Sky_r88ux")
+tonemap_mode = 2
+ssao_radius = 8.88
+ssao_intensity = 16.0
+ssao_power = 0.588438
+ssao_detail = 3.95
+ssao_horizon = 1.0
+glow_enabled = true
+glow_intensity = 4.4
+glow_strength = 0.58
+glow_bloom = 0.5
+fog_light_color = Color(0.0558595, 0.305261, 0.42244, 1)
+fog_sun_scatter = 0.59
+fog_density = 0.0515
+fog_sky_affect = 0.901
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.1
+volumetric_fog_albedo = Color(0.0266238, 0.20838, 0.294247, 1)
+volumetric_fog_emission_energy = 0.0
+volumetric_fog_anisotropy = 0.5
+volumetric_fog_ambient_inject = 9.71
+volumetric_fog_sky_affect = 0.55
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_44ouq"]
+shader = ExtResource("2_jvady")
+shader_parameter/scale = 2.0
+
+[sub_resource type="Shader" id="Shader_44ouq"]
+code = "shader_type spatial;
+ 
+render_mode unshaded, cull_front;
+ 
+uniform float border_width;
+uniform vec4 color : source_color = vec4(1.0);
+ 
+void vertex() {
+	VERTEX += VERTEX * border_width * 0.001;
+}
+
+void fragment() {
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u4qf1"]
+render_priority = 0
+shader = SubResource("Shader_44ouq")
+shader_parameter/border_width = 9.28
+shader_parameter/color = Color(1, 1, 1, 1)
+
+[node name="Main3d" type="Node3D"]
+script = ExtResource("1_wgehl")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_3lx8b")
+
+[node name="PrimaryLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.847067, 0.306533, -0.434183, 0.0422675, 0.775482, 0.629953, 0.529803, -0.551964, 0.643929, 0, 0, 0)
+light_color = Color(0.998608, 1, 0.903707, 1)
+light_energy = 1.615
+light_angular_distance = 72.65
+light_specular = 2.23
+
+[node name="SecondaryLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.967661, 0.124268, -0.219519, -0.240894, 0.71343, -0.658018, 0.074841, 0.68962, 0.720294, 0, 0, 0)
+light_color = Color(0.207135, 0.246653, 0.456977, 1)
+
+[node name="BoidParticle3D" type="GPUParticles3D" parent="."]
+process_material = SubResource("ShaderMaterial_44ouq")
+draw_pass_1 = ExtResource("4_c7fxi")
+
+[node name="FlyingController" parent="." instance=ExtResource("5_c7fxi")]
+unique_name_in_owner = true
+transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0, 0, -32)
+
+[node name="BoundaryBox" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.999722, 0, -0.0235772, 0, 1, 0, 0.0235772, 0, 0.999722, 0, 0, 0)
+visible = false
+mesh = ExtResource("5_6hh2s")
+surface_material_override/0 = SubResource("ShaderMaterial_u4qf1")
+
+[node name="FPSLabel" type="Label" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(187.715, 34.655)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -163.0
+offset_bottom = 23.0
+grow_horizontal = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 12
+text = "BOIDS: 100 / FPS: 120"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UI" parent="." node_paths=PackedStringArray("main") instance=ExtResource("7_7mund")]
+unique_name_in_owner = true
+main = NodePath("..")
