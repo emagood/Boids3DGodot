@@ -8,5 +8,5 @@ The project explores flocking behavior using compute shaders in Godot, featuring
 - A simple UI for visualizing and adjusting flocking parameters such as alignment, cohesion, separation, neighbor radius, and more.
 
 ## Acknowledgements
-Original 2D Boids Compute project by [@niceeffort](https://github.com/niceeffort).  
+Original 2D Boids Compute project by [@niceeffort](https://gitlab.com/niceeffort).
 Heavily inspired by [@SebLague](https://github.com/SebLague)'s Boids project and steering algorithms.
