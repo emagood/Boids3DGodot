@@ -30,6 +30,9 @@ func setup(shader_path:String, pos:Array, vel:Array, data_img:PackedByteArray, q
 	
 	boid_pos_buffer = _generate_vec4_buffer(pos)
 	boid_vel_buffer = _generate_vec4_buffer(vel)
+	params_buffer = _generate_param_buffer([
+		NUM_BOIDS, IMAGE_SIZE, WORLD_SIZE.x, WORLD_SIZE.y, WORLD_SIZE.z,
+		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 	
 	var fmt = RDTextureFormat.new()
 	fmt.width  = IMAGE_SIZE
@@ -50,10 +53,12 @@ func setup(shader_path:String, pos:Array, vel:Array, data_img:PackedByteArray, q
 		_generate_uniform(boid_data_buffer, RenderingDevice.UNIFORM_TYPE_IMAGE,          3),
 		_generate_uniform(boid_quat_buffer, RenderingDevice.UNIFORM_TYPE_IMAGE,          4),
 	]
+	uniform_set = rd.uniform_set_create(bindings, pipeline, 0)
 
 
-func update(delta: float, params:Array) -> void:
-	var params_byte_array = PackedFloat32Array(params).to_byte_array()
+func update(params:Array) -> void:
+	var arr = [NUM_BOIDS, IMAGE_SIZE, WORLD_SIZE.x, WORLD_SIZE.y, WORLD_SIZE.z] + params
+	var params_byte_array = PackedFloat32Array(arr).to_byte_array()
 	rd.buffer_update(params_buffer, 0, params_byte_array.size(), params_byte_array)
 	
 	var compute_list = rd.compute_list_begin()
