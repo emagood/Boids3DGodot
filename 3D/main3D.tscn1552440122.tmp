@@ -1,6 +1,6 @@
 [gd_scene load_steps=14 format=3 uid="uid://baq47jb3rp0up"]
 
-[ext_resource type="Script" uid="uid://d4nm6snf7jf75" path="res://3D/main_3d_alt.gd" id="1_7mund"]
+[ext_resource type="Script" uid="uid://d4nm6snf7jf75" path="res://3D/main_3d.gd" id="1_7mund"]
 [ext_resource type="Texture2D" uid="uid://7tjshxom4mfu" path="res://boid_resources/skyrender_1.png" id="2_7mund"]
 [ext_resource type="Shader" uid="uid://cvsgnm3vigxbm" path="res://godot_shaders/BoidParticles3D.gdshader" id="2_jvady"]
 [ext_resource type="ArrayMesh" uid="uid://dmc8h6bdbawfy" path="res://boid_resources/fish2.obj" id="4_c7fxi"]

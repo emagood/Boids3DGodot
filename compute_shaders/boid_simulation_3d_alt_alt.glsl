@@ -105,7 +105,7 @@ void main() {
     my_pos = vec3(
         mod(my_pos.x, params.world_size_x),
         mod(my_pos.y, params.world_size_y),
-        mod(my_pos.z, params.world_size_z)
+        mod(my_pos.z, params.world_size_x)
     );
 
     boid_vel.data[my_index] = vec4(my_vel, 0.0);
