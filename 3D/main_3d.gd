@@ -5,14 +5,18 @@ const WORLD_SIZE := Vector3(30, 30, 30)
 const SIMULATE_GPU := true
 
 @export_category("Boid Settings")
-@export var friend_radius:     float = 2.0
+@export var friend_radius:     float = 1.5
 @export var avoid_radius:      float = 1.0
 @export var min_vel:           float = 1.0
 @export var max_vel:           float = 2.0
 @export var steer_factor:      float = 1.0
 @export var alignment_factor:  float = 1.5
-@export var cohesion_factor:   float = 2.0
-@export var separation_factor: float = 3.5
+@export var cohesion_factor:   float = 2.5
+@export var separation_factor: float = 3.2
+@export var flow_factor:       float = 0.15
+@export var mouse_factor:      float = 1.0
+@export var avoidance_factor:  float = 0.3
+@export var time_scale:        float = 1.0
 
 @onready var BoidParticle3D: GPUParticles3D = $BoidParticle3D
 @onready var FlyingController: CharacterBody3D = %FlyingController
@@ -120,7 +124,7 @@ func _update_data_texture():
 	else:
 		for i in NUM_BOIDS:
 			var px = int(i % IMAGE_SIZE)
-			var py = int(i / IMAGE_SIZE)
+			var py = int(i / floor(IMAGE_SIZE))
 			var p = boid_pos[i]
 			var v = boid_lerp_vel[i]
 			boid_data.set_pixel(px, py, Color(p.x, p.y, p.z, 1.0))
@@ -196,20 +200,11 @@ func _generate_uniform(data_buffer, type, binding) -> RDUniform:
 
 func _generate_parameter_buffer(delta):
 	var params_buffer_bytes : PackedByteArray = PackedFloat32Array(
-		[NUM_BOIDS,
-		IMAGE_SIZE,
-		WORLD_SIZE.x,
-		WORLD_SIZE.y,
-		WORLD_SIZE.z,
-		friend_radius,
-		avoid_radius,
-		min_vel,
-		max_vel,
-		steer_factor,
-		alignment_factor,
-		cohesion_factor,
-		separation_factor,
-		delta]).to_byte_array()
+		[NUM_BOIDS, IMAGE_SIZE, WORLD_SIZE.x, WORLD_SIZE.y, WORLD_SIZE.z,
+		friend_radius, avoid_radius, min_vel, max_vel,
+		steer_factor, alignment_factor, cohesion_factor, separation_factor,
+		flow_factor, mouse_factor, avoidance_factor,
+		time_scale, delta]).to_byte_array()
 	
 	return rd.storage_buffer_create(params_buffer_bytes.size(), params_buffer_bytes)
 
@@ -252,20 +247,11 @@ func _setup_compute_shader():
 
 func _update_boids_gpu(delta):
 	var new_params_data = PackedFloat32Array(
-		[NUM_BOIDS,
-		IMAGE_SIZE,
-		WORLD_SIZE.x,
-		WORLD_SIZE.y,
-		WORLD_SIZE.z,
-		friend_radius,
-		avoid_radius,
-		min_vel,
-		max_vel,
-		max_steer_force,
-		alignment_factor,
-		cohesion_factor,
-		separation_factor,
-		delta]).to_byte_array()
+		[NUM_BOIDS, IMAGE_SIZE, WORLD_SIZE.x, WORLD_SIZE.y, WORLD_SIZE.z,
+		friend_radius, avoid_radius, min_vel, max_vel,
+		steer_factor, alignment_factor, cohesion_factor, separation_factor,
+		flow_factor, mouse_factor, avoidance_factor,
+		time_scale, delta]).to_byte_array()
 	
 	rd.buffer_update(params_buffer, 0, new_params_data.size(), new_params_data)
 	

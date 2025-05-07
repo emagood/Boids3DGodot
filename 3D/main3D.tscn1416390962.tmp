@@ -1,31 +1,12 @@
-[gd_scene load_steps=19 format=3 uid="uid://baq47jb3rp0up"]
+[gd_scene load_steps=14 format=3 uid="uid://baq47jb3rp0up"]
 
 [ext_resource type="Script" uid="uid://dradbjcvh58mv" path="res://3D/main_3d.gd" id="1_7mund"]
 [ext_resource type="Texture2D" uid="uid://7tjshxom4mfu" path="res://boid_resources/skyrender_1.png" id="2_7mund"]
-[ext_resource type="Shader" uid="uid://bi8aadr4fjyea" path="res://3D/UnderwaterShader.gdshader" id="2_emwm5"]
 [ext_resource type="Shader" uid="uid://cvsgnm3vigxbm" path="res://godot_shaders/BoidParticles3D.gdshader" id="2_jvady"]
-[ext_resource type="Shader" uid="uid://dw13w5x6khxc0" path="res://3D/Underwater.gdshader" id="3_kjor4"]
-[ext_resource type="ArrayMesh" uid="uid://cbsxfo1tnj5v" path="res://boid_resources/newFish.obj" id="4_7mund"]
+[ext_resource type="ArrayMesh" uid="uid://dmc8h6bdbawfy" path="res://boid_resources/fish2.obj" id="4_c7fxi"]
 [ext_resource type="BoxMesh" uid="uid://5wk0s0jl1qbd" path="res://boid_resources/BoundaryBox.tres" id="5_6hh2s"]
 [ext_resource type="PackedScene" uid="uid://b3i5rtg0dojte" path="res://3D/mine_craft_controller.tscn" id="5_c7fxi"]
 [ext_resource type="PackedScene" uid="uid://b6lx6v7vb1xxq" path="res://UI.tscn" id="7_7mund"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_c7fxi"]
-shader = ExtResource("3_kjor4")
-shader_parameter/chroma_strength = 0.022
-shader_parameter/barrel_strength = 0.0
-shader_parameter/effect_falloff_start = 0.125
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_kjor4"]
-render_priority = 0
-shader = ExtResource("2_emwm5")
-shader_parameter/time = 0.0
-shader_parameter/strength = 0.02
-shader_parameter/edge_fade = 2.5
-
-[sub_resource type="QuadMesh" id="QuadMesh_c7fxi"]
-flip_faces = true
-size = Vector2(2, 2)
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_3lx8b"]
 panorama = ExtResource("2_7mund")
@@ -86,27 +67,6 @@ shader_parameter/color = Color(1, 1, 1, 1)
 [node name="Main3d" type="Node3D"]
 script = ExtResource("1_7mund")
 
-[node name="UI" parent="." node_paths=PackedStringArray("main") instance=ExtResource("7_7mund")]
-unique_name_in_owner = true
-main = NodePath("..")
-
-[node name="Shader" type="CanvasLayer" parent="."]
-layer = -1
-
-[node name="ColorRect" type="ColorRect" parent="Shader"]
-material = SubResource("ShaderMaterial_c7fxi")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-visible = false
-material_override = SubResource("ShaderMaterial_kjor4")
-mesh = SubResource("QuadMesh_c7fxi")
-
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_3lx8b")
 
@@ -123,7 +83,7 @@ light_color = Color(0.207135, 0.246653, 0.456977, 1)
 
 [node name="BoidParticle3D" type="GPUParticles3D" parent="."]
 process_material = SubResource("ShaderMaterial_44ouq")
-draw_pass_1 = ExtResource("4_7mund")
+draw_pass_1 = ExtResource("4_c7fxi")
 
 [node name="FlyingController" parent="." instance=ExtResource("5_c7fxi")]
 unique_name_in_owner = true
@@ -149,3 +109,7 @@ theme_override_constants/outline_size = 12
 text = "BOIDS: 100 / FPS: 120"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="UI" parent="." node_paths=PackedStringArray("main") instance=ExtResource("7_7mund")]
+unique_name_in_owner = true
+main = NodePath("..")

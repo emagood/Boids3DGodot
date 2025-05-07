@@ -11,15 +11,18 @@ extends CanvasLayer
 
 func _ready() -> void:
 	var slider_list = [
-		["friend_radius",     0, 100],
-		["avoid_radius",      0, 100],
+		["friend_radius",     0, 5],
+		["avoid_radius",      0, 5],
 		["min_vel",           0, 100],
 		["max_vel",           0, 100],
-		["max_steer_force",   0, 100],
-		["alignment_factor",  0, 100],
-		["cohesion_factor",   0, 100],
-		["separation_factor", 0, 100],
-		["rot_weight",        0, 100],
+		["steer_factor",      0, 5],
+		["alignment_factor",  0, 5],
+		["cohesion_factor",   0, 5],
+		["separation_factor", 0, 5],
+		["flow_factor",       0, 5],
+		["mouse_factor",      0, 5],
+		["avoidance_factor",  0, 5],
+		["time_scale",        0, 4],
 	]
 	
 	slider_menu.add_sliders(slider_list)

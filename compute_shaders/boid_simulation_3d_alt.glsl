@@ -25,10 +25,14 @@ layout(set = 0, binding = 2, std430) restrict buffer Params{
     float avoid_radius;
     float min_vel;
     float max_vel;
-    float max_steer_force;
+    float steer_factor;
     float alignment_factor;
     float cohesion_factor;
     float separation_factor;
+    float flow_factor;
+    float mouse_factor;
+    float avoidance_factor;
+    float time_scale;
     float delta_time;
 } params;
 
@@ -39,19 +43,33 @@ layout(rgba32f, binding = 4) uniform image2D boid_quat;
 
 vec3 steer_towards(vec3 target, vec3 heading) {
     float tlen = length(target);
-    if (tlen < 1e-5)       // no meaningful target → no steer
-        return vec3(0.0);
+    if (tlen < 1e-5) return vec3(0.0);
 
     vec3 desired = (target / tlen) * params.max_vel;
     vec3 v = desired - heading;
     float mag = length(v);
-    // clamp the steering magnitude:
+
     v = (mag > 1e-5)
-        ? normalize(v) * min(mag, params.max_steer_force)
+        ? normalize(v) * min(mag, params.steer_factor)
         : vec3(0.0);
     return v;
 }
 
+vec3 sampleFlowField(vec3 p) {
+    vec3 center = vec3(params.world_size_x/2., 
+                       params.world_size_y/2., 
+                       params.world_size_z/2.);
+
+    vec3 rel = p - center;
+    float r = length(rel);
+    vec3 tangent = normalize(vec3(-rel.z, 0.0, rel.x));
+
+    float R = min(params.world_size_x, 
+                  params.world_size_z) * 0.4;
+    float k = smoothstep(R, max(R, 1e-3), r);
+    vec3 inward = normalize(-rel) * k;
+    return normalize(tangent * 1.0 + inward * 2.0);
+}
 
 void main() {
     int my_index = int(gl_GlobalInvocationID.x);
@@ -95,18 +113,36 @@ void main() {
         acceleration += steer_towards(seperation_vec, my_vel) * params.separation_factor;
     }
 
-    my_vel += acceleration * params.delta_time;
+    vec3 flow = sampleFlowField(my_pos);
+    acceleration += steer_towards(flow, my_vel) * params.flow_factor;
+
+    if (params.avoidance_factor > 0.0) {
+        vec3 minB = vec3(10.);
+        vec3 maxB = vec3(
+            params.world_size_x  - 10.,
+            params.world_size_y  - 10.,
+            params.world_size_z  - 10.
+        );
+        vec3 clamped = clamp(my_pos, minB, maxB);
+        vec3 edgePush = clamped - my_pos;
+        acceleration += steer_towards(edgePush, my_vel) * params.avoidance_factor;
+    }
+
+    float dt = params.delta_time * params.time_scale;
+    my_vel += acceleration * dt;
     float speed = length(my_vel);
     vec3 dir = normalize(my_vel);
     speed = clamp(speed, params.min_vel, params.max_vel);
     my_vel = dir * speed;
-    my_pos += my_vel * params.delta_time;
+    my_pos += my_vel * dt;
 
-    my_pos = vec3(
-        mod(my_pos.x, params.world_size_x),
-        mod(my_pos.y, params.world_size_y),
-        mod(my_pos.z, params.world_size_z)
-    );
+    if (params.avoidance_factor <= 0.0) {
+        my_pos = vec3(
+            mod(my_pos.x, params.world_size_x),
+            mod(my_pos.y, params.world_size_y),
+            mod(my_pos.z, params.world_size_z)
+        );
+    }
 
     boid_vel.data[my_index] = vec4(my_vel, 0.0);
     boid_pos.data[my_index] = vec4(my_pos, 0.0);
@@ -117,7 +153,7 @@ void main() {
     );
 
     vec3 prev_lerp = imageLoad(boid_quat, pixel_pos).xyz;
-    prev_lerp = prev_lerp + (my_vel - prev_lerp) * 3. * params.delta_time;
+    prev_lerp = prev_lerp + (my_vel - prev_lerp) * 3. * dt;
 
     imageStore(boid_data, pixel_pos, vec4(my_pos.x, my_pos.y, my_pos.z, 1));
     imageStore(boid_quat, pixel_pos, vec4(prev_lerp.x, prev_lerp.y, prev_lerp.z, 1));
