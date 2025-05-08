@@ -4,4 +4,4 @@
 
 [resource]
 material = SubResource("StandardMaterial3D_h6e0y")
-size = Vector3(20, 10, 20)
+size = Vector3(30, 30, 30)

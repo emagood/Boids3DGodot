@@ -23,8 +23,7 @@ func _unhandled_input(event):
 
 @onready var main_3d: Node3D = $".."
 
-
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	var fwd = -global_transform.basis.z
 	fwd.y = 0
 	fwd = fwd.normalized()
@@ -43,9 +42,9 @@ func _physics_process(delta: float) -> void:
 		dir += right
 	
 	var vert_speed := 0.0
-	if Input.is_action_pressed("move_up"):
+	if Input.is_action_pressed("move_up") and General.is_viewing:
 		vert_speed += move_speed
-	if Input.is_action_pressed("move_down"):
+	if Input.is_action_pressed("move_down") and General.is_viewing:
 		vert_speed -= move_speed
 	
 	var horizontal = dir.normalized() * move_speed

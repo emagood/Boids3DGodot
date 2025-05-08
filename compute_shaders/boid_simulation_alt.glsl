@@ -14,16 +14,17 @@ layout(set = 0, binding = 1, std430) restrict buffer Velocity{
 layout(set = 0, binding = 2, std430) restrict buffer Params{
     float num_boids;
     float image_size;
+    float viewport_x;
+    float viewport_y;
     float friend_radius;
     float avoid_radius;
     float min_vel;
     float max_vel;
-    float max_steer_force;
+    float steer_factor;
     float alignment_factor;
     float cohesion_factor;
     float separation_factor;
-    float viewport_x;
-    float viewport_y;
+    float time_scale;
     float delta_time;
 } params;
 
@@ -39,7 +40,7 @@ vec2 steer_towards(vec2 target, vec2 heading) {
     float mag = length(v);
     // clamp the steering magnitude:
     v = (mag > 1e-5)
-        ? normalize(v) * min(mag, params.max_steer_force)
+        ? normalize(v) * min(mag, params.steer_factor)
         : vec2(0.0);
     return v;
 }
@@ -86,12 +87,14 @@ void main() {
         acceleration += steer_towards(seperation_vec, my_vel) * params.separation_factor;
     }
 
-    my_vel += acceleration * params.delta_time;
+    float dt = params.delta_time * params.time_scale;
+
+    my_vel += acceleration * dt;
     float speed = length(my_vel);
     vec2 dir = normalize(my_vel);
     speed = clamp(speed, params.min_vel, params.max_vel);
     my_vel = dir * speed;
-    my_pos += my_vel * params.delta_time;
+    my_pos += my_vel * dt;
 
     my_pos = vec2(
         mod(my_pos.x, params.viewport_x),
@@ -115,7 +118,7 @@ void main() {
     }
 
     float prev_rot = imageLoad(boid_data, pixel_pos).z;
-    prev_rot = prev_rot + (my_rot - prev_rot) * 30. * params.delta_time;
+    prev_rot = prev_rot + (my_rot - prev_rot) * 30. * dt;
 
     imageStore(boid_data, pixel_pos, vec4(my_pos.x, my_pos.y, prev_rot, 1));
 }

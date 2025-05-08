@@ -3,25 +3,24 @@ shader_type particles;
 uniform sampler2D boid_data;
 uniform float scale = .5;
 
-
-vec4 texel_color(sampler2D data, uint index) {
-	ivec2 pos_image_size = textureSize(data, 0);
-	ivec2 texel_pos = ivec2(int(mod(float(index), float(pos_image_size.x))),
-							int(float(index) / float(pos_image_size.x)));
-	vec4 data_color = texelFetch(data, texel_pos, 0);
-	return data_color;
+vec4 fetch_boid_data(sampler2D texture_data, uint particle_index) {
+	ivec2 texture_dimensions = textureSize(texture_data, 0);
+	ivec2 pixel_coordinates = ivec2(
+		int(mod(float(particle_index), float(texture_dimensions.x))),
+		int(float(particle_index) / float(texture_dimensions.x))
+	);
+	return texelFetch(texture_data, pixel_coordinates, 0);
 }
 
-
 void process() {
-	vec4 boid_pos_rot = texel_color(boid_data, INDEX);
-	float angle = boid_pos_rot.z;
+	vec4 pos_angle = fetch_boid_data(boid_data, INDEX);
+	vec2 position = pos_angle.xy;
+	float angle   = pos_angle.z;
 	
-	mat2 scale_rot_mat = mat2(vec2(cos(angle), sin(angle)),
-							  vec2(-sin(angle), cos(angle)));
-	scale_rot_mat *= scale;
+	mat2 orientation_matrix = mat2(vec2( cos(angle), sin(angle)),
+	                               vec2(-sin(angle), cos(angle))) * scale;
 	
-	TRANSFORM[0].xy = scale_rot_mat[0];
-	TRANSFORM[1].xy = scale_rot_mat[1];
-	TRANSFORM[3].xy = vec2(boid_pos_rot.x, boid_pos_rot.y);
+	TRANSFORM[0].xy = orientation_matrix[0];
+	TRANSFORM[1].xy = orientation_matrix[1];
+	TRANSFORM[3].xy = position;
 }

@@ -1,8 +1,8 @@
 extends Node3D
 
-const NUM_BOIDS := 10_000
+const NUM_BOIDS := 100
 const WORLD_SIZE := Vector3(30, 30, 30)
-const SIMULATE_GPU := true
+const SIMULATE_GPU := false
 
 @export_category("Boid Settings")
 @export var friend_radius:     float = 2.0

@@ -7,34 +7,16 @@
 
 layout(local_size_x = 1024, local_size_y = 1, local_size_z = 1) in;
 
-layout(set = 0, binding = 0, std430) restrict buffer Position {
-    vec4 data[];
-} boid_pos;
+layout(set = 0, binding = 0, std430) restrict buffer Position { vec4 data[]; } boid_pos;
 
-layout(set = 0, binding = 1, std430) restrict buffer Velocity{
-    vec4 data[];
-} boid_vel;
+layout(set = 0, binding = 1, std430) restrict buffer Velocity { vec4 data[]; } boid_vel;
 
 layout(set = 0, binding = 2, std430) restrict buffer Params{
-    float num_boids;
-    float image_size;
-    float world_size_x;
-    float world_size_y;
-    float world_size_z;
-    float friend_radius;
-    float avoid_radius;
-    float min_vel;
-    float max_vel;
-    float steer_factor;
-    float alignment_factor;
-    float cohesion_factor;
-    float separation_factor;
-    float flow_factor;
-    float mouse_factor;
-    float avoidance_factor;
-    float time_scale;
-    float delta_time;
-} params;
+    float num_boids; float image_size; float world_size_x; float world_size_y; float world_size_z;
+    float friend_radius; float avoid_radius; float min_vel; float max_vel;
+    float steer_factor; float alignment_factor; float cohesion_factor; float separation_factor;
+    float flow_factor; float mouse_factor; float avoidance_factor;
+    float time_scale; float delta_time; } params;
 
 layout(rgba32f, binding = 3) uniform image2D boid_data;
 
@@ -56,11 +38,7 @@ vec3 steer_towards(vec3 target, vec3 heading) {
 }
 
 vec3 sampleFlowField(vec3 p) {
-    vec3 center = vec3(params.world_size_x/2., 
-                       params.world_size_y/2., 
-                       params.world_size_z/2.);
-
-    vec3 rel = p - center;
+    vec3 rel = p;
     float r = length(rel);
     vec3 tangent = normalize(vec3(-rel.z, 0.0, rel.x));
 
@@ -117,12 +95,15 @@ void main() {
     acceleration += steer_towards(flow, my_vel) * params.flow_factor;
 
     if (params.avoidance_factor > 0.0) {
-        vec3 minB = vec3(10.);
-        vec3 maxB = vec3(
-            params.world_size_x  - 10.,
-            params.world_size_y  - 10.,
-            params.world_size_z  - 10.
+        vec3 halfSize = vec3(
+            params.world_size_x / 2.0,
+            params.world_size_y / 2.0,
+            params.world_size_z / 2.0
         );
+        
+        vec3 minB = -halfSize + vec3(10.);
+        vec3 maxB = halfSize - vec3(10.);
+
         vec3 clamped = clamp(my_pos, minB, maxB);
         vec3 edgePush = clamped - my_pos;
         acceleration += steer_towards(edgePush, my_vel) * params.avoidance_factor;
@@ -137,11 +118,20 @@ void main() {
     my_pos += my_vel * dt;
 
     if (params.avoidance_factor <= 0.0) {
-        my_pos = vec3(
-            mod(my_pos.x, params.world_size_x),
-            mod(my_pos.y, params.world_size_y),
-            mod(my_pos.z, params.world_size_z)
+        vec3 half_size = vec3(
+            params.world_size_x / 2.0,
+            params.world_size_y / 2.0,
+            params.world_size_z / 2.0
         );
+        
+        if (my_pos.x < -half_size.x) my_pos.x += params.world_size_x;
+        if (my_pos.x > half_size.x) my_pos.x -= params.world_size_x;
+        
+        if (my_pos.y < -half_size.y) my_pos.y += params.world_size_y;
+        if (my_pos.y > half_size.y) my_pos.y -= params.world_size_y;
+        
+        if (my_pos.z < -half_size.z) my_pos.z += params.world_size_z;
+        if (my_pos.z > half_size.z) my_pos.z -= params.world_size_z;
     }
 
     boid_vel.data[my_index] = vec4(my_vel, 0.0);

@@ -1,6 +1,6 @@
 extends Node2D
 
-const NUM_BOIDS : int = 1_000
+const NUM_BOIDS : int = 5_000
 var boid_pos = []
 var boid_vel = []
 
@@ -9,14 +9,15 @@ var boid_data : Image
 var boid_data_texture : ImageTexture
 
 @export_category("Boid Settings")
-@export_range(0,100) var friend_radius = 30.0
-@export_range(0,100) var avoid_radius = 15.0
-@export_range(0,100) var min_vel = 10.0
-@export_range(0,100) var max_vel = 15.0
-@export_range(0,100) var max_steer_force = 20.0
-@export_range(0,100) var alignment_factor = 5.0
-@export_range(0,100) var cohesion_factor = 5.0
-@export_range(0,100) var separation_factor = 40.0
+@export_range(0,100) var friend_radius = 18.0
+@export_range(0,100) var avoid_radius = 12.0
+@export_range(0,100) var min_vel = 20.0
+@export_range(0,100) var max_vel = 30.0
+@export_range(0,100) var steer_factor = 10.0
+@export_range(0,100) var alignment_factor = 12.5
+@export_range(0,100) var cohesion_factor = 21.5
+@export_range(0,100) var separation_factor = 85.0
+@export_range(0,100) var time_scale = 1.0
 
 # GPU variables
 var SIMULATE_GPU = true
@@ -124,20 +125,11 @@ func _generate_uniform(data_buffer, type, binding) -> RDUniform:
 	return data_uniform
 
 func _generate_parameter_buffer(delta):
-	var params_buffer_bytes : PackedByteArray = PackedFloat32Array(
-		[NUM_BOIDS,
-		IMAGE_SIZE,
-		friend_radius,
-		avoid_radius,
-		min_vel*5,
-		max_vel*5,
-		max_steer_force,
-		alignment_factor,
-		cohesion_factor,
-		separation_factor,
-		get_viewport_rect().size.x,
-		get_viewport_rect().size.y,
-		delta]).to_byte_array()
+	var params_buffer_bytes := PackedFloat32Array(
+	[NUM_BOIDS, IMAGE_SIZE, get_viewport_rect().size.x, get_viewport_rect().size.y,
+	friend_radius, avoid_radius, min_vel*5, max_vel*5,
+	steer_factor, alignment_factor, cohesion_factor, separation_factor,
+	time_scale, delta]).to_byte_array()
 	
 	return rd.storage_buffer_create(params_buffer_bytes.size(), params_buffer_bytes)
 
@@ -170,19 +162,22 @@ func _setup_compute_shader():
 	var boid_data_buffer_uniform = _generate_uniform(boid_data_buffer, RenderingDevice.UNIFORM_TYPE_IMAGE, 3)
 	
 	bindings = [boid_pos_uniform, boid_vel_uniform, params_uniform, boid_data_buffer_uniform]
+	
+	uniform_set = rd.uniform_set_create(bindings, boid_compute_shader, 0)
 
 
 func _update_boids_gpu(delta):
-	rd.free_rid(params_buffer)
-	params_buffer = _generate_parameter_buffer(delta)
-	params_uniform.clear_ids()
-	params_uniform.add_id(params_buffer)
-	uniform_set = rd.uniform_set_create(bindings, boid_compute_shader, 0)
+	var new_params_data := PackedFloat32Array(
+		[NUM_BOIDS, IMAGE_SIZE, get_viewport_rect().size.x, get_viewport_rect().size.y,
+		friend_radius, avoid_radius, min_vel*5, max_vel*5,
+		steer_factor, alignment_factor, cohesion_factor, separation_factor,
+		time_scale, delta]).to_byte_array()
+	
+	rd.buffer_update(params_buffer, 0, new_params_data.size(), new_params_data)
 	
 	var compute_list := rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
-	
 	rd.compute_list_dispatch(compute_list, ceil(NUM_BOIDS/1024.), 1, 1)
 	rd.compute_list_end()
 	rd.submit()
@@ -206,13 +201,16 @@ func _process(delta: float) -> void:
 		_update_boids_gpu(delta)
 
 
+func _free_gpu_resources():
+	rd.free_rid(uniform_set)
+	rd.free_rid(boid_data_buffer)
+	rd.free_rid(params_buffer)
+	rd.free_rid(boid_pos_buffer)
+	rd.free_rid(boid_vel_buffer)
+	rd.free_rid(pipeline)
+	rd.free_rid(boid_compute_shader)
+
+
 func _exit_tree():
 	if SIMULATE_GPU:
-		rd.free_rid(uniform_set)
-		rd.free_rid(boid_data_buffer)
-		rd.free_rid(params_buffer)
-		rd.free_rid(boid_pos_buffer)
-		rd.free_rid(boid_vel_buffer)
-		rd.free_rid(pipeline)
-		rd.free_rid(boid_compute_shader)
-		rd.free()
+		call_deferred("_free_gpu_resources")

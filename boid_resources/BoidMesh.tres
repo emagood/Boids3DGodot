@@ -7,4 +7,5 @@ material = SubResource("StandardMaterial3D_vhr8b")
 top_radius = 0.0
 height = 1.0
 radial_segments = 6
-rings = 1
+rings = 0
+cap_top = false

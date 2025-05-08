@@ -13,7 +13,7 @@ theme_override_font_sizes/font_size = 16
 text = "variable"
 
 [node name="value" type="HSlider" parent="."]
-custom_minimum_size = Vector2(150, 20)
+custom_minimum_size = Vector2(175, 25)
 layout_mode = 2
 size_flags_vertical = 4
 value = 50.0

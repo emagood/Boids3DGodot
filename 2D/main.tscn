@@ -11,13 +11,6 @@ shader_parameter/scale = 0.5
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_ig7tw")
-friend_radius = 17.802
-avoid_radius = 9.139
-min_vel = 47.64
-max_vel = 100.0
-alignment_factor = 8.355
-cohesion_factor = 5.527
-separation_factor = 33.685
 
 [node name="BoidParticles" type="GPUParticles2D" parent="."]
 texture_filter = 1
@@ -41,4 +34,5 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="UI" parent="." node_paths=PackedStringArray("main") instance=ExtResource("4_0b63c")]
+visible = false
 main = NodePath("..")
