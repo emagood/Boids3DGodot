@@ -10,3 +10,8 @@ The project explores flocking behavior using compute shaders in Godot, featuring
 ## Acknowledgements
 Original 2D Boids Compute project by [@niceeffort](https://gitlab.com/niceeffort).  
 Heavily inspired by [@SebLague](https://github.com/SebLague)'s Boids project and steering algorithms.
+
+## Demo Media
+![](https://github.com/AlecHero/Boids3DGodot/blob/main/Demo%20Media/inside%20boid%20swarm.png)
+![](https://github.com/AlecHero/Boids3DGodot/blob/main/Demo%20Media/outside%20boid%20ball.png)
+![](https://github.com/AlecHero/Boids3DGodot/raw/main/Demo%20Media/Boids2D.png)
