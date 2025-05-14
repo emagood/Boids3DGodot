@@ -1,0 +1,153 @@
+[gd_scene load_steps=17 format=3 uid="uid://baq47jb3rp0up"]
+
+[ext_resource type="Script" uid="uid://d4nm6snf7jf75" path="res://3D/main_3d.gd" id="1_wgehl"]
+[ext_resource type="Shader" uid="uid://cvsgnm3vigxbm" path="res://godot_shaders/BoidParticles3D.gdshader" id="2_jvady"]
+[ext_resource type="Texture2D" uid="uid://ynwa20nfy1hs" path="res://BoidResources/autumn_field_puresky_4k.hdr" id="2_r88ux"]
+[ext_resource type="ArrayMesh" uid="uid://dmc8h6bdbawfy" path="res://BoidResources/fish2.obj" id="4_c7fxi"]
+[ext_resource type="BoxMesh" uid="uid://5wk0s0jl1qbd" path="res://BoidResources/BoundaryBox.tres" id="5_6hh2s"]
+[ext_resource type="PackedScene" uid="uid://b3i5rtg0dojte" path="res://mine_craft_controller.tscn" id="5_c7fxi"]
+[ext_resource type="Script" uid="uid://dh5donp8itt41" path="res://3D/UI.gd" id="7_c7fxi"]
+[ext_resource type="Texture2D" uid="uid://d1ly4yx7j74vw" path="res://BoidResources/black square.png" id="7_u4qf1"]
+[ext_resource type="Script" uid="uid://di1rtmv0qort2" path="res://3D/slider_menu.gd" id="9_5r7qa"]
+[ext_resource type="PackedScene" uid="uid://c8wwit1eanf54" path="res://3D/slider_menu_part.tscn" id="9_44ouq"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_3lx8b"]
+panorama = ExtResource("2_r88ux")
+
+[sub_resource type="Sky" id="Sky_r88ux"]
+sky_material = SubResource("PanoramaSkyMaterial_3lx8b")
+
+[sub_resource type="Environment" id="Environment_3lx8b"]
+background_mode = 2
+sky = SubResource("Sky_r88ux")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_44ouq"]
+shader = ExtResource("2_jvady")
+shader_parameter/scale = 2.0
+
+[sub_resource type="Shader" id="Shader_44ouq"]
+code = "shader_type spatial;
+ 
+render_mode unshaded, cull_front;
+ 
+uniform float border_width;
+uniform vec4 color : source_color = vec4(1.0);
+ 
+void vertex() {
+	VERTEX += VERTEX * border_width * 0.001;
+}
+
+void fragment() {
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u4qf1"]
+render_priority = 0
+shader = SubResource("Shader_44ouq")
+shader_parameter/border_width = 9.28
+shader_parameter/color = Color(1, 1, 1, 1)
+
+[node name="Main3d" type="Node3D"]
+script = ExtResource("1_wgehl")
+rot_weight = 100.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_3lx8b")
+
+[node name="PrimaryLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.847067, 0.306533, -0.434183, 0.0422675, 0.775482, 0.629953, 0.529803, -0.551964, 0.643929, 0, 0, 0)
+light_color = Color(0.998608, 1, 0.903707, 1)
+light_energy = 1.615
+light_angular_distance = 72.65
+light_specular = 2.23
+
+[node name="SecondaryLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.967661, 0.124268, -0.219519, -0.240894, 0.71343, -0.658018, 0.074841, 0.68962, 0.720294, 0, 0, 0)
+light_color = Color(0.207135, 0.246653, 0.456977, 1)
+
+[node name="BoidParticle3D" type="GPUParticles3D" parent="."]
+process_material = SubResource("ShaderMaterial_44ouq")
+draw_pass_1 = ExtResource("4_c7fxi")
+
+[node name="FlyingController" parent="." instance=ExtResource("5_c7fxi")]
+unique_name_in_owner = true
+transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0, 0, -32)
+
+[node name="BoundaryBox" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.999722, 0, -0.0235772, 0, 1, 0, 0.0235772, 0, 0.999722, 0, 0, 0)
+visible = false
+mesh = ExtResource("5_6hh2s")
+surface_material_override/0 = SubResource("ShaderMaterial_u4qf1")
+
+[node name="FPSLabel" type="Label" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(187.715, 34.655)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -163.0
+offset_bottom = 23.0
+grow_horizontal = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 12
+text = "BOIDS: 100 / FPS: 120"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UI" type="CanvasLayer" parent="." node_paths=PackedStringArray("main_3d")]
+unique_name_in_owner = true
+visible = false
+script = ExtResource("7_c7fxi")
+main_3d = NodePath("..")
+
+[node name="BoidDataTexture" type="TextureRect" parent="UI"]
+unique_name_in_owner = true
+texture_filter = 1
+offset_left = 29.0
+offset_top = 29.0
+offset_right = 162.0
+offset_bottom = 162.0
+texture = ExtResource("7_u4qf1")
+
+[node name="BoidQuatTexture" type="TextureRect" parent="UI"]
+unique_name_in_owner = true
+texture_filter = 1
+offset_left = 199.0
+offset_top = 30.0
+offset_right = 331.0
+offset_bottom = 162.0
+texture = ExtResource("7_u4qf1")
+
+[node name="DebugLabel" type="Label" parent="UI"]
+unique_name_in_owner = true
+offset_left = -368.0
+offset_top = 31.0
+offset_right = -65.0
+offset_bottom = 127.0
+theme_override_font_sizes/font_size = 18
+text = "debug lister:"
+autowrap_mode = 1
+
+[node name="SliderMenu" type="PanelContainer" parent="UI" node_paths=PackedStringArray("main_3d")]
+unique_name_in_owner = true
+offset_left = 29.0
+offset_top = 182.0
+offset_right = 332.0
+offset_bottom = 390.0
+script = ExtResource("9_5r7qa")
+main_3d = NodePath("../..")
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/SliderMenu"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="SliderMenuContainer" type="VBoxContainer" parent="UI/SliderMenu/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SliderMenuPart" parent="UI/SliderMenu/MarginContainer/SliderMenuContainer" instance=ExtResource("9_44ouq")]
+layout_mode = 2

@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8wwit1eanf54"]
+
+[ext_resource type="Script" uid="uid://omimn1bep26k" path="res://3D/slider_menu_part.gd" id="1_gsba5"]
+
+[node name="SliderMenuPart" type="HBoxContainer"]
+theme_override_constants/separation = 16
+script = ExtResource("1_gsba5")
+
+[node name="property" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "variable"
+
+[node name="value" type="HSlider" parent="."]
+custom_minimum_size = Vector2(175, 25)
+layout_mode = 2
+size_flags_vertical = 4
+value = 50.0
+
+[node name="value_label" type="Label" parent="."]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0.0"

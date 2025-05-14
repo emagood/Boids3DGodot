@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://v22qu4aop16g"]
+
+[ext_resource type="Script" uid="uid://c3d351w5374vc" path="res://2D/main.gd" id="1_ig7tw"]
+[ext_resource type="Texture2D" uid="uid://c8uds6ydr21ve" path="res://boid_resources/boid.png" id="2_h2yge"]
+[ext_resource type="Shader" uid="uid://cntcy215teg0h" path="res://godot_shaders/BoidParticles.gdshader" id="3_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://b6lx6v7vb1xxq" path="res://UI.tscn" id="4_0b63c"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_67vx0"]
+shader = ExtResource("3_1bvp3")
+shader_parameter/scale = 0.5
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_ig7tw")
+
+[node name="BoidParticles" type="GPUParticles2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2_h2yge")
+process_material = SubResource("ShaderMaterial_67vx0")
+
+[node name="FPSLabel" type="Label" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(187.715, 34.655)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = 962.0
+offset_right = 1149.71
+offset_bottom = 34.655
+grow_horizontal = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 12
+text = "BOIDS: 100 / FPS: 120"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UI" parent="." node_paths=PackedStringArray("main") instance=ExtResource("4_0b63c")]
+visible = false
+main = NodePath("..")

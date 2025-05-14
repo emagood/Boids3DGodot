@@ -1,0 +1,34 @@
+[gd_resource type="Environment" load_steps=4 format=3 uid="uid://8oxktb8sv8p8"]
+
+[ext_resource type="Texture2D" uid="uid://c11e7nb5jnkmk" path="res://boid_resources/skyrender_1 - genderfreak.png" id="1_nqas7"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_3lx8b"]
+panorama = ExtResource("1_nqas7")
+
+[sub_resource type="Sky" id="Sky_r88ux"]
+sky_material = SubResource("PanoramaSkyMaterial_3lx8b")
+
+[resource]
+background_mode = 2
+sky = SubResource("Sky_r88ux")
+tonemap_mode = 2
+ssao_radius = 8.88
+ssao_intensity = 16.0
+ssao_power = 0.588438
+ssao_detail = 3.95
+ssao_horizon = 1.0
+glow_enabled = true
+glow_intensity = 4.4
+glow_strength = 0.58
+glow_bloom = 0.5
+fog_light_color = Color(0.0558595, 0.305261, 0.42244, 1)
+fog_sun_scatter = 0.59
+fog_density = 0.0515
+fog_sky_affect = 0.901
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.1
+volumetric_fog_albedo = Color(0.0266238, 0.20838, 0.294247, 1)
+volumetric_fog_emission_energy = 0.0
+volumetric_fog_anisotropy = 0.5
+volumetric_fog_ambient_inject = 9.71
+volumetric_fog_sky_affect = 0.55

@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://bsoq2uva6o175"
+path="res://.godot/imported/boid_simulation_3d_image_alt.glsl-7b84c07dbd80128a954f8f814f87c9e5.res"
+
+[deps]
+
+source_file="res://compute_shaders/boid_simulation_3d_image_alt.glsl"
+dest_files=["res://.godot/imported/boid_simulation_3d_image_alt.glsl-7b84c07dbd80128a954f8f814f87c9e5.res"]
+
+[params]
+
