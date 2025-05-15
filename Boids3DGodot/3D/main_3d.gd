@@ -28,8 +28,8 @@ var IMAGE_SIZE : int
 @onready var BoundaryBox: MeshInstance3D = $BoundaryBox
 @onready var BoidEnvironment: WorldEnvironment = $BoidEnvironment
 
-const NeonTetra = preload("res://boid_resources/fishNeonTeT.obj")
-const CopperbandButterflyfish = preload("res://boid_resources/newFish.obj")
+const NeonTetra = preload("res://boid_resources/NeonTetra.obj")
+const CopperbandButterflyfish = preload("res://boid_resources/CopperbandButterflyfish.obj")
 const ConeBoid = preload("res://boid_resources/ConeBoid.obj")
 const WaterEnvironment = preload("res://boid_resources/WaterEnvironment.tres")
 
@@ -101,8 +101,8 @@ func _init_simulation() -> void:
 	boid_velo_texture = ImageTexture.create_from_image(boid_velo)
 	
 	BoidParticle3D.amount = NUM_BOIDS
-	BoidParticle3D.process_material.set_shader_parameter("boid_data", boid_data_texture)
-	BoidParticle3D.process_material.set_shader_parameter("boid_velo", boid_velo_texture)
+	BoidParticle3D.process_material.set_shader_parameter("boid_pos", boid_data_texture)
+	BoidParticle3D.process_material.set_shader_parameter("boid_vel", boid_velo_texture)
 	BoidParticle3D.custom_aabb = AABB(-WORLD_SIZE/2, WORLD_SIZE)
 	BoidParticle3D.visibility_aabb = BoidParticle3D.custom_aabb
 	

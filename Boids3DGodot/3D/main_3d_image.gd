@@ -20,7 +20,7 @@ var IMAGE_SIZE : int
 @export var separation_factor: float = 3.2
 @export var flow_factor:       float = 0.1
 @export var mouse_factor:      float = 1.0
-@export var avoidance_factor:  float = 0.3
+@export var avoidance_factor:  float = 2.0
 @export var time_scale:        float = 1.0
 
 @onready var BoidParticle3D: GPUParticles3D = $BoidParticle3D
@@ -65,9 +65,9 @@ func _ready() -> void:
 	randomize()
 	_init_simulation()
 
-var sim1_params = [350,    Vector3(10,10,10), false]
-var sim2_params = [350,    Vector3(10,10,10), true]
-var sim3_params = [10_000, Vector3(30,30,30), true]
+var sim1_params = [350,   Vector3(10,10,10), false]
+var sim2_params = [1_000, Vector3(10,10,10), true]
+var sim3_params = [10_000,Vector3(30,30,30), true]
 
 func _unhandled_input(event: InputEvent) -> void:
 	if   event.is_action_pressed("sim1"):
@@ -83,6 +83,85 @@ func _unhandled_input(event: InputEvent) -> void:
 		BoidEnvironment.environment = WaterEnvironment
 		restart_simulation(sim3_params)
 
+var boid_p : Array[Vector3] = []
+var boid_v : Array[Vector3] = []
+var boid_l : Array[Vector3] = []
+
+func _generate_boids_3d_arrays() -> void:
+	for i in NUM_BOIDS:
+		boid_p.append(Vector3(
+			randf() * WORLD_SIZE.x,
+			randf() * WORLD_SIZE.y,
+			randf() * WORLD_SIZE.z))
+		boid_v.append(Vector3(
+			randf_range(-1.0, 1.0) * max_vel,
+			randf_range(-1.0, 1.0) * max_vel,
+			randf_range(-1.0, 1.0) * max_vel))
+		boid_l.append(boid_v[i])
+
+func _update_boids_cpu_3d(delta):
+	for i in NUM_BOIDS:
+		var my_pos = boid_p[i]
+		var my_vel = boid_v[i]
+		var my_lerp = boid_l[i]
+		var avg_vel = Vector3.ZERO
+		var midpoint = Vector3.ZERO
+		var separation_vec = Vector3.ZERO
+		var num_friends = 0
+		var num_avoids = 0
+		
+		for j in NUM_BOIDS:
+			if i != j:
+				var other_pos = boid_p[j]
+				var other_vel = boid_v[j]
+				var dist = my_pos.distance_to(other_pos)
+				if(dist < friend_radius):
+					num_friends += 1
+					avg_vel += other_vel
+					midpoint += other_pos
+					if(dist < avoid_radius):
+						num_avoids += 1
+						separation_vec += my_pos - other_pos
+		
+		if(num_friends > 0):
+			avg_vel /= num_friends
+			my_vel += avg_vel.normalized() * alignment_factor
+			
+			midpoint /= num_friends
+			my_vel += (midpoint - my_pos).normalized() * cohesion_factor
+			
+			if(num_avoids > 0):
+				my_vel += separation_vec.normalized() * separation_factor
+		
+		var vel_mag = my_vel.length()
+		vel_mag = clamp(vel_mag, min_vel, max_vel)
+		my_vel = my_vel.normalized() * vel_mag
+		my_pos += my_vel * delta
+		my_pos = Vector3(wrapf(my_pos.x, -WORLD_SIZE.x/2, WORLD_SIZE.x/2,),
+						 wrapf(my_pos.y, -WORLD_SIZE.y/2, WORLD_SIZE.y/2,),
+						 wrapf(my_pos.z, -WORLD_SIZE.z/2, WORLD_SIZE.z/2,))
+		
+		my_lerp = lerp(my_lerp, my_vel, 3. * delta)
+		
+		boid_p[i] = my_pos
+		boid_v[i] = my_vel
+		boid_l[i] = my_lerp
+	
+	
+	## UPDATE TEXTURE
+	for i in NUM_BOIDS:
+		var px = int(i % IMAGE_SIZE)
+		var py = int(i / IMAGE_SIZE)
+		var p = boid_p[i]
+		var v = boid_v[i]
+		var l = boid_l[i]
+		boid_pos.set_pixel(px, py, Color(p.x, p.y, p.z, 1.0))
+		boid_vel.set_pixel(px, py, Color(v.x, v.y, v.z, 1.0))
+		boid_lerp.set_pixel(px, py, Color(l.x, l.y, l.z, 1.0))
+	boid_pos_texture.update(boid_pos)
+	boid_vel_texture.update(boid_vel)
+	boid_lerp_texture.update(boid_lerp)
+
 
 func _init_simulation() -> void:
 	IMAGE_SIZE = int(ceil(sqrt(NUM_BOIDS)))
@@ -95,6 +174,7 @@ func _init_simulation() -> void:
 	boid_lerp_texture = ImageTexture.create_from_image(boid_lerp)
 	
 	_generate_boids_3d()
+	_generate_boids_3d_arrays()
 	
 	BoidParticle3D.amount = NUM_BOIDS
 	BoidParticle3D.process_material.set_shader_parameter("boid_pos", boid_pos_texture)
@@ -236,6 +316,8 @@ func _process(delta: float) -> void:
 	if SIMULATE_GPU:
 		_update_boids_gpu(delta)
 		_sync_boids_gpu()
+	else:
+		_update_boids_cpu_3d(delta)
 	
 	main.visible = !General.is_viewing
 

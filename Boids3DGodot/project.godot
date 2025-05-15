@@ -13,7 +13,7 @@ config_version=5
 config/name="BoidCompute"
 run/main_scene="uid://baq47jb3rp0up"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="res://boid_resources/icon.svg"
+config/icon="uid://c8uds6ydr21ve"
 
 [autoload]
 
