@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://7wvl7mgtngq7"
-path.s3tc="res://.godot/imported/newFish.jpg-767f3d6a1425bfee37885a175ba2e20d.s3tc.ctex"
+path.s3tc="res://.godot/imported/CopperbandButterflyfish.jpg-34b7b5e3f97a4818719fe77063d6e776.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://boid_resources/newFish.jpg"
-dest_files=["res://.godot/imported/newFish.jpg-767f3d6a1425bfee37885a175ba2e20d.s3tc.ctex"]
+source_file="res://boid_resources/CopperbandButterflyfish.jpg"
+dest_files=["res://.godot/imported/CopperbandButterflyfish.jpg-34b7b5e3f97a4818719fe77063d6e776.s3tc.ctex"]
 
 [params]
 

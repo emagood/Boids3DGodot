@@ -46,6 +46,31 @@ vec3 sampleFlowField(vec3 p) {
     return normalize(tangent * 1.0 + inward * 2.0);
 }
 
+vec3 boundaryAvoidance(vec3 pos, vec3 vel) {
+    vec3 halfSize = vec3(
+        params.world_size_x * 0.5,
+        params.world_size_y * 0.5,
+        params.world_size_z * 0.5
+    );
+
+    vec3 distPosFace = halfSize - pos;
+    vec3 distNegFace = halfSize + pos;
+
+    vec3 push = vec3(0.0);
+    if (distPosFace.x < 0.0) push.x += distPosFace.x;
+    if (distNegFace.x < 0.0) push.x -= distNegFace.x;
+    if (distPosFace.y < 0.0) push.y += distPosFace.y;
+    if (distNegFace.y < 0.0) push.y -= distNegFace.y;
+    if (distPosFace.z < 0.0) push.z += distPosFace.z;
+    if (distNegFace.z < 0.0) push.z -= distNegFace.z;
+
+    if (length(push) < 1e-6) {
+        return vel;
+    } else {
+        return steerTowards(push, vel);
+    }
+}
+
 void main() {
     int my_index = int(gl_GlobalInvocationID.x);
     if (my_index >= int(params.num_boids)) { return; }
@@ -57,6 +82,7 @@ void main() {
 
     vec4 bpos = imageLoad(boid_pos, my_texel);
     vec4 bvel = imageLoad(boid_vel, my_texel);
+    vec4 blerp = imageLoad(boid_lerp, my_texel);
 
     vec3 my_pos = bpos.xyz;
     vec3 my_vel = bvel.xyz;
@@ -100,23 +126,8 @@ void main() {
         acceleration += steerTowards(seperation_vec, my_vel) * params.separation_factor;
     }
 
-    vec3 flow = sampleFlowField(my_pos);
-    acceleration += steerTowards(flow, my_vel) * params.flow_factor;
-
-    if (params.avoidance_factor > 0.0) {
-        vec3 halfSize = vec3(
-            params.world_size_x / 2.0,
-            params.world_size_y / 2.0,
-            params.world_size_z / 2.0
-        );
-        
-        vec3 minB = -halfSize + vec3(10.);
-        vec3 maxB = halfSize - vec3(10.);
-
-        vec3 clamped = clamp(my_pos, minB, maxB);
-        vec3 edgePush = clamped - my_pos;
-        acceleration += steerTowards(edgePush, my_vel) * params.avoidance_factor;
-    }
+    acceleration += steerTowards(sampleFlowField(my_pos), my_vel) * params.flow_factor;
+    acceleration += boundaryAvoidance(my_pos, my_vel) * params.avoidance_factor;
 
     float dt = params.delta_time * params.time_scale;
     my_vel += acceleration * dt;
@@ -126,24 +137,6 @@ void main() {
     my_vel = dir * speed;
     my_pos += my_vel * dt;
 
-    if (params.avoidance_factor <= 0.0) {
-        vec3 half_size = vec3(
-            params.world_size_x / 2.0,
-            params.world_size_y / 2.0,
-            params.world_size_z / 2.0
-        );
-        
-        if (my_pos.x < -half_size.x) my_pos.x += params.world_size_x;
-        if (my_pos.x > half_size.x) my_pos.x -= params.world_size_x;
-        
-        if (my_pos.y < -half_size.y) my_pos.y += params.world_size_y;
-        if (my_pos.y > half_size.y) my_pos.y -= params.world_size_y;
-        
-        if (my_pos.z < -half_size.z) my_pos.z += params.world_size_z;
-        if (my_pos.z > half_size.z) my_pos.z -= params.world_size_z;
-    }
-
-    vec4 blerp = imageLoad(boid_lerp, my_texel);
     vec3 my_lerp = blerp.xyz;
     my_lerp = my_lerp + (my_vel - my_lerp) * 3. * dt;
 

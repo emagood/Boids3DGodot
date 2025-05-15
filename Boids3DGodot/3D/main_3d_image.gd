@@ -28,8 +28,13 @@ var IMAGE_SIZE : int
 @onready var BoundaryBox: MeshInstance3D = $BoundaryBox
 @onready var BoidEnvironment: WorldEnvironment = $BoidEnvironment
 
-const NeonTetra = preload("res://boid_resources/fishNeonTeT.obj")
-const CopperbandButterflyfish = preload("res://boid_resources/newFish.obj")
+@onready var main: CSGBox3D = $Main
+@onready var sub_1: CSGBox3D = $Main/Sub1
+@onready var sub_2: CSGBox3D = $Main/Sub2
+@onready var sub_3: CSGBox3D = $Main/Sub3
+
+const NeonTetra = preload("res://boid_resources/NeonTetra.obj")
+const CopperbandButterflyfish = preload("res://boid_resources/CopperbandButterflyfish.obj")
 const ConeBoid = preload("res://boid_resources/ConeBoid.obj")
 const WaterEnvironment = preload("res://boid_resources/WaterEnvironment.tres")
 
@@ -98,6 +103,11 @@ func _init_simulation() -> void:
 	BoidParticle3D.visibility_aabb = BoidParticle3D.custom_aabb
 	
 	BoundaryBox.mesh.size = WORLD_SIZE
+	
+	main.size = WORLD_SIZE
+	sub_1.size = main.size * Vector3(0.98, 0.98, 1.01)
+	sub_2.size = sub_1.size
+	sub_3.size = sub_1.size
 	
 	if SIMULATE_GPU:
 		_setup_compute_shader()
@@ -221,13 +231,13 @@ func _sync_boids_gpu():
 
 
 func _process(delta: float) -> void:
-	#if not SIMULATE_GPU:
-		#_update_boids_cpu_3d(delta)
 	_update_data_texture()
 	
 	if SIMULATE_GPU:
 		_update_boids_gpu(delta)
 		_sync_boids_gpu()
+	
+	main.visible = !General.is_viewing
 
 
 func _free_gpu_resources():
@@ -250,7 +260,12 @@ func _on_num_boids_text_submitted(new_text: String) -> void:
 
 func _on_world_radius_value_changed(value: float) -> void:
 	WORLD_SIZE = Vector3(value, value, value)
-	_init_simulation()
+	BoidParticle3D.custom_aabb = AABB(-WORLD_SIZE/2, WORLD_SIZE)
+	
+	main.size = WORLD_SIZE
+	sub_1.size = main.size * Vector3(0.98, 0.98, 1.01)
+	sub_2.size = sub_1.size
+	sub_3.size = sub_1.size
 
 func _on_simulate_gpu_toggled(toggled_on: bool) -> void:
 	SIMULATE_GPU = toggled_on

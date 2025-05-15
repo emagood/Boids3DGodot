@@ -1,6 +1,6 @@
 # Blender 4.3.2
 # www.blender.org
-mtllib newFish.mtl
+mtllib CopperbandButterflyfish.mtl
 o Cube.001
 v -0.000127 -0.009779 0.127258
 v -0.000225 -0.019795 0.128301
