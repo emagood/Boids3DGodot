@@ -1,6 +1,6 @@
 extends Node2D
 
-const NUM_BOIDS : int = 5_000
+const NUM_BOIDS : int = 10000
 var boid_pos = []
 var boid_vel = []
 

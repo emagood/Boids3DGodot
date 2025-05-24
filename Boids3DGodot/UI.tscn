@@ -26,6 +26,7 @@ size_flags_horizontal = 4
 
 [node name="BoidDataTexture" type="TextureRect" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 texture_filter = 1
 layout_mode = 2
 texture = ExtResource("2_vrfts")
@@ -34,6 +35,7 @@ stretch_mode = 5
 
 [node name="BoidVeloTexture" type="TextureRect" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 texture_filter = 1
 layout_mode = 2
 texture = ExtResource("2_vrfts")
